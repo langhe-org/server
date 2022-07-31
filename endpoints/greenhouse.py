@@ -1,8 +1,8 @@
 from .shared import app
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from models.main import engine
-from models.greenhouse import Greenhouse
+from database.main import engine
+from database.greenhouse import Greenhouse
 
 @app.post("/greenhouse")
 async def create():

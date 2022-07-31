@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from endpoints.main import app
-from models.main import *
+from database.main import *
 
 
 @app.get("/")

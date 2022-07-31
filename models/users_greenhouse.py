@@ -1,10 +1,8 @@
-from sqlalchemy import Column
-from sqlalchemy import ForeignKey
-from sqlalchemy import Integer
-from .shared import Base
+from sqlalchemy import Column, ForeignKey, Integer
+from .db_base import Base
 
 
-class UserGreenhouse(Base):
+class DbUserGreenhouse(Base):
     __tablename__ = "user_greenhouse"
 
     id = Column(Integer, primary_key=True)

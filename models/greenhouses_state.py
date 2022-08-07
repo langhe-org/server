@@ -1,4 +1,6 @@
+from argparse import Action
 from sqlalchemy import Column, ForeignKey, Integer, Float, Boolean, DateTime, Enum, func
+from typing import List
 import enum
 from .db_base import Base
 from pydantic import BaseModel
@@ -22,39 +24,86 @@ class LightningState(enum.Enum):
     Default = "Default" # change to lowercase
 
 
-class Weather(enum.Enum):
-    Default = 1
+class Sensor(BaseModel):
+    temperature: float = None
+    humidity: float = None
+    quantum : int = None #float
+
+class Subsystem(BaseModel):
+    mode: ControlMode
+    state: LightningState
 
 
-class GreenhouseState(BaseModel):
-    id: int
-    greenhouse_id: int # TODO: full greenhouse?
-    time: datetime
-    timezone: float
-    dst: bool
-    temperature: int
-    humidity: float
-    quantum: int
-    environment_mode: ControlMode
-    environment_state: EnvironmentState
-    ipm_mode: ControlMode
-    ipm_state: IpmState
-    lighting_mode: ControlMode
-    lighting_state: LightningState
+class Control(BaseModel):
+    environment: Subsystem
+    ipm: Subsystem
+    lighting: Subsystem
+    # irrigation: Subsystem
+
+
+class Actuator(BaseModel):
     heater: bool
     exhaust: bool
     ventilator: bool
     sulfur: bool
-    weather_temperature: int = None
-    weather_humidity: float = None
-    weather_sky: Weather = None
-    push_seconds: int = 60
+    # lights: bool
+    # valve: List[bool]
+
+
+class SkyWeather(enum.Enum):
+    default = "default"
+
+
+class WeatherCurrent(BaseModel):
+    temperature: float
+    humidity: float
+    sky: SkyWeather # change to str?
+
+
+class Weather(BaseModel):
+    current: WeatherCurrent
+
+
+class GreenhouseState(BaseModel):
+    id: int
+    greenhouse_id: int
+    time: datetime
+    timezone: float # move to greenhouse
+    dst: bool # remove
+    sensor: Sensor = None
+    control: Control
+    actuator: Actuator
+    weather: Weather = None
+    push_seconds: int = 60 # remove
 
     class Config:
         orm_mode = True
 
     def to_db_greenhouse_state(self): # can the return type be strongly typed?
-        return DbGreenhouseState(id=self.id, greenhouse_id=self.greenhouse_id, time=self.time, timezone=self.timezone, dst=self.dst, temperature=self.temperature, humidity=self.humidity, quantum=self.quantum, environment_mode=self.environment_mode, environment_state=self.environment_state, ipm_mode=self.ipm_mode, ipm_state=self.ipm_state, lighting_mode=self.lighting_mode, lighting_state=self.lighting_state, heater=self.heater, exhaust=self.exhaust, ventilator=self.ventilator, sulfur=self.sulfur, weather_temperature=self.weather_temperature, weather_humidity=self.weather_humidity, weather_sky=self.weather_sky, push_seconds=self.push_seconds)
+        return DbGreenhouseState(
+            id=self.id,
+            greenhouse_id=self.greenhouse_id,
+            time=self.time,
+            timezone=self.timezone,
+            dst=self.dst,
+            temperature=self.sensor.temperature,
+            humidity=self.sensor.humidity,
+            quantum=self.sensor.quantum,
+            environment_mode=self.control.environment.mode,
+            environment_state=self.control.environment.state,
+            ipm_mode=self.control.ipm.mode,
+            ipm_state=self.control.ipm.state,
+            lighting_mode=self.control.lighting.mode,
+            lighting_state=self.control.lighting.state,
+            heater=self.actuator.heater,
+            exhaust=self.actuator.exhaust,
+            ventilator=self.actuator.ventilator,
+            sulfur=self.actuator.sulfur,
+            weather_temperature=self.weather.current.temperature,
+            weather_humidity=self.weather.current.humidity,
+            weather_sky=self.weather.current.sky,
+            push_seconds=self.push_seconds
+        )
 
 
 class DbGreenhouseState(Base):
@@ -80,36 +129,85 @@ class DbGreenhouseState(Base):
     sulfur = Column(Boolean, nullable=False)
     weather_temperature = Column(Integer, nullable=True)
     weather_humidity = Column(Float, nullable=True)
-    weather_sky = Column(Enum(Weather), nullable=True)
+    weather_sky = Column(Enum(SkyWeather), nullable=True)
     push_seconds = Column(Integer, nullable=False)
 
     def __repr__(self):
-        return f"GreenhouseState(id={self.id!r}, email_address={self.email_address!r})"
+        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, timezone={self.timezone!r}, dst={self.dst!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}, push_seconds={self.push_seconds!r}"
+
 
     def to_greenhouse_state(self) -> GreenhouseState:
-        return GreenhouseState(id=self.id, greenhouse_id=self.greenhouse_id, time=self.time, timezone=self.timezone, dst=self.dst, temperature=self.temperature, humidity=self.humidity, quantum=self.quantum, environment_mode=self.environment_mode, environment_state=self.environment_state, ipm_mode=self.ipm_mode, ipm_state=self.ipm_state, lighting_mode=self.lighting_mode, lighting_state=self.lighting_state, heater=self.heater, exhaust=self.exhaust, ventilator=self.ventilator, sulfur=self.sulfur, weather_temperature=self.weather_temperature, weather_humidity=self.weather_humidity, weather_sky=self.weather_sky, push_seconds=self.push_seconds)
+        return GreenhouseState(
+            id=self.id,
+            greenhouse_id=self.greenhouse_id,
+            time=self.time,
+            timezone=self.timezone,
+            dst=self.dst,
+            sensor=Sensor(
+                temperature=self.temperature,
+                humidity=self.humidity,
+                quantum=self.quantum,
+            ),
+            control=Control(
+                environment=Subsystem(
+                    mode=self.environment_mode,
+                    state=self.environment_state.name,
+                ),
+                ipm=Subsystem(
+                    mode=self.ipm_mode,
+                    state=self.ipm_state.name,
+                ),
+                lighting=Subsystem(
+                    mode=self.lighting_mode,
+                    state=self.lighting_state.name,
+                ),
+            ),
+            actuator=Actuator(
+                heater=self.heater,
+                exhaust=self.exhaust,
+                ventilator=self.ventilator,
+                sulfur=self.sulfur,
+            ),
+            weather=Weather(
+                current=WeatherCurrent(
+                    temperature=self.weather_temperature,
+                    humidity=self.weather_humidity,
+                    sky=self.weather_sky,
+                )
+            ),
+            push_seconds=self.push_seconds,
+        )
 
 
 class CreateGreenhouseState(BaseModel):
     timezone: float
     dst: bool
-    temperature: int
-    humidity: float
-    quantum: int
-    environment_mode: ControlMode
-    environment_state: EnvironmentState
-    ipm_mode: ControlMode
-    ipm_state: IpmState
-    lighting_mode: ControlMode
-    lighting_state: LightningState
-    heater: bool
-    exhaust: bool
-    ventilator: bool
-    sulfur: bool
-    weather_temperature: int = None
-    weather_humidity: float = None
-    weather_sky: Weather = None
+    sensor: Sensor = None
+    control: Control
+    actuator: Actuator
+    weather: Weather = None
     push_seconds: int = 60
 
     def to_db_greenhouse_state(self, greenhouse_id: int) -> DbGreenhouseState:
-        return DbGreenhouseState(greenhouse_id=greenhouse_id, timezone=self.timezone, dst=self.dst, temperature=self.temperature, humidity=self.humidity, quantum=self.quantum, environment_mode=self.environment_mode, environment_state=self.environment_state, ipm_mode=self.ipm_mode, ipm_state=self.ipm_state, lighting_mode=self.lighting_mode, lighting_state=self.lighting_state, heater=self.heater, exhaust=self.exhaust, ventilator=self.ventilator, sulfur=self.sulfur, weather_temperature=self.weather_temperature, weather_humidity=self.weather_humidity, weather_sky=self.weather_sky, push_seconds=self.push_seconds)
+        return DbGreenhouseState(
+            greenhouse_id=greenhouse_id,
+            timezone=self.timezone,
+            dst=self.dst,
+            temperature=self.sensor.temperature,
+            humidity=self.sensor.humidity,
+            quantum=self.sensor.quantum,
+            environment_mode=self.control.environment.mode,
+            environment_state="Default",
+            ipm_mode=self.control.ipm.mode,
+            ipm_state="Default",
+            lighting_mode=self.control.lighting.mode,
+            lighting_state="Default",
+            heater=self.actuator.heater,
+            exhaust=self.actuator.exhaust,
+            ventilator=self.actuator.ventilator,
+            sulfur=self.actuator.sulfur,
+            weather_temperature=self.weather.current.temperature,
+            weather_humidity=self.weather.current.humidity,
+            weather_sky=self.weather.current.sky,
+            push_seconds=self.push_seconds
+        )

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class GreenhouseType(enum.Enum):
-    proto_1_ithaca = 1
+    proto_1_ithaca = "proto_1_ithaca"
 
 
 class Greenhouse(BaseModel):

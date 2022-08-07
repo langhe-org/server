@@ -6,20 +6,20 @@ from datetime import datetime
 
 
 class ControlMode(enum.Enum):
-    automatic = 1
-    manual = 2
+    automatic = "automatic"
+    manual = "manual"
 
 
 class EnvironmentState(enum.Enum):
-    Default = 1
+    Default = "Default" # change to lowercase
 
 
 class IpmState(enum.Enum):
-    Default = 1
+    Default = "Default" # change to lowercase
 
 
 class LightningState(enum.Enum):
-    Default = 1
+    Default = "Default" # change to lowercase
 
 
 class Weather(enum.Enum):

@@ -5,8 +5,8 @@ from pydantic import BaseModel, EmailStr
 from .db_base import Base
 
 class Units(enum.Enum):
-    metric = 1
-    imperial = 2
+    metric = "metric"
+    imperial = "imperial"
 
 
 class User(BaseModel):

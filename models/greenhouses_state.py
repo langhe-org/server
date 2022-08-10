@@ -20,6 +20,10 @@ class IpmState(enum.Enum):
     Default = "Default" # change to lowercase
 
 
+class IrrigationState(enum.Enum):
+    Default = "Default" # change to lowercase
+
+
 class LightningState(enum.Enum):
     Default = "Default" # change to lowercase
 
@@ -38,7 +42,7 @@ class Control(BaseModel):
     environment: Subsystem
     ipm: Subsystem
     lighting: Subsystem
-    # irrigation: Subsystem
+    irrigation: Subsystem
 
 
 class Actuator(BaseModel):
@@ -94,6 +98,8 @@ class GreenhouseState(BaseModel):
             ipm_state=self.control.ipm.state,
             lighting_mode=self.control.lighting.mode,
             lighting_state=self.control.lighting.state,
+            irrigation_mode=self.control.irrigation.mode,
+            irrigation_state=self.control.irrigation.state,
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
             ventilator=self.actuator.ventilator,
@@ -121,6 +127,8 @@ class DbGreenhouseState(Base):
     ipm_state = Column(Enum(IpmState), nullable=False)
     lighting_mode = Column(Enum(ControlMode), nullable=False)
     lighting_state = Column(Enum(LightningState), nullable=False)
+    irrigation_mode = Column(Enum(ControlMode), nullable=False)
+    irrigation_state = Column(Enum(IrrigationState), nullable=False)
     heater = Column(Boolean, nullable=False)
     exhaust = Column(Boolean, nullable=False)
     ventilator = Column(Boolean, nullable=False)
@@ -130,7 +138,7 @@ class DbGreenhouseState(Base):
     weather_sky = Column(Enum(SkyWeather), nullable=True)
 
     def __repr__(self):
-        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, timezone={self.timezone!r}, dst={self.dst!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
+        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, timezone={self.timezone!r}, dst={self.dst!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_state={self.irrigation_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
 
 
     def to_greenhouse_state(self) -> GreenhouseState:
@@ -157,6 +165,10 @@ class DbGreenhouseState(Base):
                 lighting=Subsystem(
                     mode=self.lighting_mode,
                     state=self.lighting_state.name,
+                ),
+                irrigation=Subsystem(
+                    mode=self.irrigation_mode,
+                    state=self.irrigation_state.name,
                 ),
             ),
             actuator=Actuator(
@@ -197,6 +209,8 @@ class CreateGreenhouseState(BaseModel):
             ipm_state="Default",
             lighting_mode=self.control.lighting.mode,
             lighting_state="Default",
+            irrigation_mode=self.control.irrigation.mode,
+            irrigation_state="Default",
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
             ventilator=self.actuator.ventilator,

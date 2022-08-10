@@ -74,7 +74,6 @@ class GreenhouseState(BaseModel):
     control: Control
     actuator: Actuator
     weather: Weather = None
-    push_seconds: int = 60 # remove
 
     class Config:
         orm_mode = True
@@ -102,7 +101,6 @@ class GreenhouseState(BaseModel):
             weather_temperature=self.weather.current.temperature,
             weather_humidity=self.weather.current.humidity,
             weather_sky=self.weather.current.sky,
-            push_seconds=self.push_seconds
         )
 
 
@@ -130,10 +128,9 @@ class DbGreenhouseState(Base):
     weather_temperature = Column(Integer, nullable=True)
     weather_humidity = Column(Float, nullable=True)
     weather_sky = Column(Enum(SkyWeather), nullable=True)
-    push_seconds = Column(Integer, nullable=False)
 
     def __repr__(self):
-        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, timezone={self.timezone!r}, dst={self.dst!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}, push_seconds={self.push_seconds!r}"
+        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, timezone={self.timezone!r}, dst={self.dst!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
 
 
     def to_greenhouse_state(self) -> GreenhouseState:
@@ -175,7 +172,6 @@ class DbGreenhouseState(Base):
                     sky=self.weather_sky,
                 )
             ),
-            push_seconds=self.push_seconds,
         )
 
 
@@ -186,7 +182,6 @@ class CreateGreenhouseState(BaseModel):
     control: Control
     actuator: Actuator
     weather: Weather = None
-    push_seconds: int = 60
 
     def to_db_greenhouse_state(self, greenhouse_id: int) -> DbGreenhouseState:
         return DbGreenhouseState(
@@ -209,5 +204,4 @@ class CreateGreenhouseState(BaseModel):
             weather_temperature=self.weather.current.temperature,
             weather_humidity=self.weather.current.humidity,
             weather_sky=self.weather.current.sky,
-            push_seconds=self.push_seconds
         )

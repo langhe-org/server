@@ -1,6 +1,11 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+import os
+
+from sqlalchemy import engine_from_config, create_engine
 from sqlalchemy import pool
 
 from alembic import context
@@ -26,6 +31,10 @@ target_metadata = None
 # ... etc.
 
 
+DATABASE_CONNECTION_STRING = os.getenv('DATABASE_CONNECTION_STRING')
+
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -38,9 +47,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=DATABASE_CONNECTION_STRING,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -57,11 +65,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = create_engine(DATABASE_CONNECTION_STRING)
 
     with connectable.connect() as connection:
         context.configure(

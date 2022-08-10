@@ -31,7 +31,7 @@ class LightningState(enum.Enum):
 class Sensor(BaseModel):
     temperature: float = None
     humidity: float = None
-    quantum : int = None #float
+    quantum : float = None
 
 class Subsystem(BaseModel):
     mode: ControlMode
@@ -120,7 +120,7 @@ class DbGreenhouseState(Base):
     dst = Column(Boolean, nullable=False)
     temperature = Column(Integer, nullable=False)
     humidity = Column(Float, nullable=False)
-    quantum = Column(Integer, nullable=False)
+    quantum = Column(Float, nullable=False)
     environment_mode = Column(Enum(ControlMode), nullable=False)
     environment_state = Column(Enum(EnvironmentState), nullable=False)
     ipm_mode = Column(Enum(ControlMode), nullable=False)

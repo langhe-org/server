@@ -12,3 +12,8 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) with your browser 
 poetry export -f requirements.txt -o requirements.txt
 gcloud app deploy
 ```
+
+## Run migrations
+```bash
+python -m alembic upgrade head
+```

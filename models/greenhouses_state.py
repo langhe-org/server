@@ -1,5 +1,6 @@
 from argparse import Action
 from sqlalchemy import Column, ForeignKey, Integer, Float, Boolean, DateTime, Enum, func
+from sqlalchemy.dialects.postgresql import JSON
 from typing import List
 import enum
 from .db_base import Base
@@ -51,7 +52,7 @@ class Actuator(BaseModel):
     ventilator: bool
     sulfur: bool
     lights: bool
-    # valve: List[bool]
+    valves: List[bool]
 
 
 class SkyWeather(enum.Enum):
@@ -101,6 +102,7 @@ class GreenhouseState(BaseModel):
             ventilator=self.actuator.ventilator,
             sulfur=self.actuator.sulfur,
             lights=self.actuator.lights,
+            valves=self.actuator.valves,
             weather_temperature=self.weather.current.temperature,
             weather_humidity=self.weather.current.humidity,
             weather_sky=self.weather.current.sky,
@@ -129,12 +131,13 @@ class DbGreenhouseState(Base):
     ventilator = Column(Boolean, nullable=False)
     sulfur = Column(Boolean, nullable=False)
     lights = Column(Boolean, nullable=False)
+    valves = Column(JSON, nullable=False)
     weather_temperature = Column(Integer, nullable=True)
     weather_humidity = Column(Float, nullable=True)
     weather_sky = Column(Enum(SkyWeather), nullable=True)
 
     def __repr__(self):
-        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_state={self.irrigation_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, lights={self.lights!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
+        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_state={self.irrigation_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, lights={self.lights!r}, valves={self.valves!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
 
 
     def to_greenhouse_state(self) -> GreenhouseState:
@@ -171,6 +174,7 @@ class DbGreenhouseState(Base):
                 ventilator=self.ventilator,
                 sulfur=self.sulfur,
                 lights=self.lights,
+                valves=self.valves,
             ),
             weather=Weather(
                 current=WeatherCurrent(
@@ -207,6 +211,7 @@ class CreateGreenhouseState(BaseModel):
             ventilator=self.actuator.ventilator,
             sulfur=self.actuator.sulfur,
             lights=self.actuator.lights,
+            valves=self.actuator.valves,
             weather_temperature=self.weather.current.temperature,
             weather_humidity=self.weather.current.humidity,
             weather_sky=self.weather.current.sky,

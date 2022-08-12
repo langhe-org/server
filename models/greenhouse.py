@@ -15,12 +15,13 @@ class Greenhouse(BaseModel):
     location_name: str = None
     longitude: int
     latitude: int
+    timezone: str
 
     class Config:
         orm_mode = True
 
     def to_db_greenhouse(self): # can the return type be strongly typed?
-        return DbGreenhouse(id=self.id, name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude)
+        return DbGreenhouse(id=self.id, name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude, timezone=self.timezone)
 
 
 class DbGreenhouse(Base):
@@ -32,12 +33,13 @@ class DbGreenhouse(Base):
     location_name = Column(String, nullable=False)
     longitude = Column(Integer, nullable=False)
     latitude = Column(Integer, nullable=False)
+    timezone = Column(String, nullable=False)
 
     def __repr__(self) -> str:
-        return f"Greenhouse(id={self.id!r}, name={self.name!r}), type={self.type!r}), location_name={self.location_name!r}), longitude={self.longitude!r}), latitude={self.latitude!r})"
+        return f"Greenhouse(id={self.id!r}, name={self.name!r}), type={self.type!r}), location_name={self.location_name!r}), longitude={self.longitude!r}), latitude={self.latitude!r}), timezone={self.timezone!r})"
 
     def to_greenhouse(self) -> Greenhouse:
-        return Greenhouse(id=self.id, name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude)
+        return Greenhouse(id=self.id, name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude, timezone=self.timezone)
 
 
 class CreateGreenhouse(BaseModel):
@@ -46,12 +48,13 @@ class CreateGreenhouse(BaseModel):
     location_name: str = None
     longitude: int
     latitude: int
+    timezone: str
 
     class Config:
         orm_mode = True
 
     def to_db_greenhouse(self) -> DbGreenhouse:
-        return DbGreenhouse(name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude)
+        return DbGreenhouse(name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude, timezone=self.timezone)
 
 
 class UpdateGreenhouse(BaseModel):
@@ -59,6 +62,7 @@ class UpdateGreenhouse(BaseModel):
     location_name: str = None
     longitude: int = None
     latitude: int = None
+    timezone: str = None
 
     class Config:
         orm_mode = True

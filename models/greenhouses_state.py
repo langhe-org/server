@@ -1,5 +1,5 @@
 from argparse import Action
-from sqlalchemy import Column, ForeignKey, Integer, Float, Boolean, DateTime, Enum, func
+from sqlalchemy import Column, ForeignKey, Integer, Float, Boolean, DateTime, String, Enum, func
 from sqlalchemy.dialects.postgresql import JSON
 from typing import List
 import enum
@@ -55,14 +55,10 @@ class Actuator(BaseModel):
     valves: List[bool]
 
 
-class SkyWeather(enum.Enum):
-    default = "default"
-
-
 class WeatherCurrent(BaseModel):
     temperature: float
     humidity: float
-    sky: SkyWeather # change to str?
+    sky: str
 
 
 class Weather(BaseModel):
@@ -134,7 +130,7 @@ class DbGreenhouseState(Base):
     valves = Column(JSON, nullable=False)
     weather_temperature = Column(Integer, nullable=True)
     weather_humidity = Column(Float, nullable=True)
-    weather_sky = Column(Enum(SkyWeather), nullable=True)
+    weather_sky = Column(String, nullable=True)
 
     def __repr__(self):
         return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_statae={self.environment_state!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_state={self.irrigation_state!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, lights={self.lights!r}, valves={self.valves!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"

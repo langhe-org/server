@@ -1,7 +1,7 @@
 """add valve
 
 Revision ID: cf2556777b23
-Revises: 45695f3da903
+Revises: 84b32d4a94bd
 Create Date: 2022-08-12 07:24:49.077336
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import JSON
 
 # revision identifiers, used by Alembic.
 revision = 'cf2556777b23'
-down_revision = '45695f3da903'
+down_revision = '84b32d4a94bd'
 branch_labels = None
 depends_on = None
 

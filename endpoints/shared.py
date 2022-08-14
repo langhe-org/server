@@ -5,9 +5,10 @@ from fastapi.security import HTTPBearer
 
 app = FastAPI()
 
-# TODO: should probably be in a config
+# TODO: should be in a config
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://860007-proto2-webapp-9prxm4zhw-langhe-team.vercel.app/"
 ]
 
 app.add_middleware(

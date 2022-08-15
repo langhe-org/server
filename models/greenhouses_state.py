@@ -14,19 +14,19 @@ class ControlMode(enum.Enum):
 
 
 class EnvironmentState(enum.Enum):
-    Default = "Default" # change to lowercase
+    default = "default"
 
 
 class IpmState(enum.Enum):
-    Default = "Default" # change to lowercase
+    default = "default"
 
 
 class IrrigationState(enum.Enum):
-    Default = "Default" # change to lowercase
+    default = "default"
 
 
 class LightningState(enum.Enum):
-    Default = "Default" # change to lowercase
+    default = "default"
 
 
 class Sensor(BaseModel):
@@ -195,13 +195,13 @@ class CreateGreenhouseState(BaseModel):
             humidity=self.sensor.humidity,
             quantum=self.sensor.quantum,
             environment_mode=self.control.environment.mode,
-            environment_state="Default",
+            environment_state="default",
             ipm_mode=self.control.ipm.mode,
-            ipm_state="Default",
+            ipm_state="default",
             lighting_mode=self.control.lighting.mode,
-            lighting_state="Default",
+            lighting_state="default",
             irrigation_mode=self.control.irrigation.mode,
-            irrigation_state="Default",
+            irrigation_state="default",
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
             ventilator=self.actuator.ventilator,

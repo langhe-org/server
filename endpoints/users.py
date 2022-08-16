@@ -7,26 +7,25 @@ from database import engine
 from models.user import DbUser, User, UpdateUser
 from fastapi.security import HTTPAuthorizationCredentials
 
-@app.get("/user/{user_id}", response_model=User)
-async def get(user_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
-    ensure_valid_jwt(credentials)
+@app.get("/account", response_model=User)
+async def get(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    jwt = ensure_valid_jwt(credentials)
     db = Session(engine)
-    db_user = db.query(DbUser).filter(DbUser.id == user_id).first()
+    db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()
     return db_user.to_user()
 
 
-# TODO: user_id should come from auth
-@app.patch("/user/{user_id}", response_model=User)
-async def update(user_id: int, user: UpdateUser, credentials: HTTPAuthorizationCredentials = Depends(security)):
-    ensure_valid_jwt(credentials)
+@app.patch("/account", response_model=User)
+async def update(user: UpdateUser, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    jwt = ensure_valid_jwt(credentials)
     db = Session(engine)
 
     db.query(DbUser)\
-       .filter(DbUser.id == user_id)\
+       .filter(DbUser.email == jwt["email"])\
        .update(user.__dict__)
     db.commit()
 
-    db_user = db.query(DbUser).filter(DbUser.id == user_id).first()
+    db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()
     user = db_user.to_user()
 
     return user

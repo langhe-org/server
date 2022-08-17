@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy import Column, Integer, Enum, String
 import enum
 from pydantic import BaseModel, EmailStr
@@ -14,6 +15,7 @@ class User(BaseModel):
     name: str = None
     email: EmailStr
     units: Units = Units.imperial
+    greenhouse_ids: List[int] = None
 
     class Config:
         orm_mode = True

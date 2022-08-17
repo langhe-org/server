@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from database import engine
 from fastapi import status
 
-@app.get("/greenhouse-state/{greenhouse_id}", response_model=GreenhouseState)
+@app.get("/v1/greenhouse-state/{greenhouse_id}", response_model=GreenhouseState)
 async def get(greenhouse_id):
     db = Session(engine)
     state = db\
@@ -17,7 +17,7 @@ async def get(greenhouse_id):
 
 
 # TODO: user_id should come from auth
-@app.post("/greenhouse-state/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
+@app.post("/v1/greenhouse-state/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
 async def create(greenhouse_id: int, state: CreateGreenhouseState):
     db = Session(engine)
 

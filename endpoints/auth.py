@@ -10,7 +10,7 @@ import os
 
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 
-@app.post("/auth/google", response_model=User)
+@app.post("/v1/auth/google", response_model=User)
 async def get_body(credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     db = Session(engine)

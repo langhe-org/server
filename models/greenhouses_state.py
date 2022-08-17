@@ -1,11 +1,12 @@
 from argparse import Action
 from sqlalchemy import Column, ForeignKey, Integer, Float, Boolean, DateTime, String, Enum, func
 from sqlalchemy.dialects.postgresql import JSON
-from typing import List
+from typing import List, Generic, TypeVar
 import enum
 from .db_base import Base
 from pydantic import BaseModel
 from datetime import datetime
+from pydantic.generics import GenericModel
 
 
 class ControlMode(enum.Enum):
@@ -34,16 +35,17 @@ class Sensor(BaseModel):
     humidity: float = None
     quantum : float = None
 
-class Subsystem(BaseModel):
+StateT = TypeVar('StateT')
+class Subsystem(GenericModel,  Generic[StateT]):
     mode: ControlMode
-    state: LightningState
+    state: StateT
 
 
 class Control(BaseModel):
-    environment: Subsystem
-    ipm: Subsystem
-    lighting: Subsystem
-    irrigation: Subsystem
+    environment: Subsystem[EnvironmentState]
+    ipm: Subsystem[IpmState]
+    lighting: Subsystem[LightningState]
+    irrigation: Subsystem[IrrigationState]
 
 
 class Actuator(BaseModel):
@@ -195,13 +197,13 @@ class CreateGreenhouseState(BaseModel):
             humidity=self.sensor.humidity,
             quantum=self.sensor.quantum,
             environment_mode=self.control.environment.mode,
-            environment_state="default",
+            environment_state=self.control.environment.state,
             ipm_mode=self.control.ipm.mode,
-            ipm_state="default",
+            ipm_state=self.control.ipm.state,
             lighting_mode=self.control.lighting.mode,
-            lighting_state="default",
+            lighting_state=self.control.lighting.state,
             irrigation_mode=self.control.irrigation.mode,
-            irrigation_state="default",
+            irrigation_state=self.control.irrigation.state,
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
             ventilator=self.actuator.ventilator,

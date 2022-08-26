@@ -13,6 +13,11 @@ poetry export -f requirements.txt -o requirements.txt
 gcloud app deploy
 ```
 
+## Generate migrations
+```bash
+python -m alembic revision --autogenerate -m "message"
+```
+
 ## Run migrations
 ```bash
 python -m alembic upgrade head

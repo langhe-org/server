@@ -32,4 +32,3 @@ engine = create_engine(
 
 
 engine.connect()
-# Base.metadata.create_all(engine)

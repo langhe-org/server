@@ -2,6 +2,7 @@ from models.user import *
 from models.greenhouse import *
 from models.users_greenhouse import *
 from models.greenhouses_state import *
+from models.command import *
 from models.db_base import Base
 import os
 from sqlalchemy import create_engine

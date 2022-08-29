@@ -1,3 +1,4 @@
+from endpoints.session_manager import SessionManager
 from models.users_greenhouse import DbUserGreenhouse
 from .shared import app, security
 from .utils import ensure_valid_jwt
@@ -13,13 +14,13 @@ GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 @app.post("/v1/auth/google", response_model=User)
 async def get_body(credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
-    db = Session(engine)
-    user = get_user_create_if_not_exist(db, jwt)
-    greenhouses = db.query(DbUserGreenhouse).filter(DbUserGreenhouse.user_id == user.id).all()
-    user.greenhouse_ids = []
-    for greenhouse_id in greenhouses:
-        user.greenhouse_ids.append(greenhouse_id.greenhouse_id)
-    return user
+    with SessionManager() as db:
+        user = get_user_create_if_not_exist(db, jwt)
+        greenhouses = db.query(DbUserGreenhouse).filter(DbUserGreenhouse.user_id == user.id).all()
+        user.greenhouse_ids = []
+        for greenhouse_id in greenhouses:
+            user.greenhouse_ids.append(greenhouse_id.greenhouse_id)
+        return user
 
 
 def get_user_create_if_not_exist(db: Session, jwt_user: dict) -> User:

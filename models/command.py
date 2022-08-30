@@ -4,7 +4,7 @@ from typing import List
 from .db_base import Base
 from pydantic import BaseModel
 from datetime import datetime, time, timedelta
-from models.greenhouses_state import ControlMode
+from models.greenhouses_state import ControlMode, LightingRecipeIntensity, SulfurIntensity
 from fastapi.encoders import jsonable_encoder
 import json
 
@@ -26,7 +26,7 @@ def control_mode_value(v: ControlMode) -> str:
 class EnvironmentRecipeCommand(BaseModel):
     day_temperature: float | None
     night_temperature: float | None
-    humidity_limit: float | None # should be enum (hight, medium, high)?
+    humidity_limit: float | None # should be enum (low, medium, high)?
 
 
 class EnvironmentCommand(BaseModel):
@@ -57,7 +57,7 @@ class EnvironmentCommand(BaseModel):
 
 
 class IpmRecipeCommand(BaseModel):
-    intensity: int | None # should be enum (hight, medium, high)?
+    intensity: SulfurIntensity | None
 
 
 class IpmCommand(BaseModel):
@@ -80,7 +80,7 @@ class IpmCommand(BaseModel):
 class LightingRecipeCommand(BaseModel):
     start_at: time | None
     stop_at: time | None
-    intensity: int | None # should be enum (hight, medium, high)?
+    intensity: LightingRecipeIntensity | None
 
 
 class LightingCommand(BaseModel):

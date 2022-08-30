@@ -32,8 +32,8 @@ class EnvironmentRecipeCommand(BaseModel):
 class EnvironmentCommand(BaseModel):
     mode: ControlMode | None
     exhaust: bool | None
-    heat: bool | None
-    vent: bool | None
+    heater: bool | None
+    ventilator: bool | None
     recipe: EnvironmentRecipeCommand | None
 
     def to_controller_command(self) -> List[str]:
@@ -42,10 +42,10 @@ class EnvironmentCommand(BaseModel):
             output.append(f"mode " + control_mode_value(self.mode))
         if self.exhaust is not None:
             output.append(f"exhaust " + on_off_value(self.exhaust))
-        if self.heat is not None:
-            output.append(f"heat " + on_off_value(self.heat))
-        if self.vent is not None:
-            output.append(f"vent " + on_off_value(self.vent))
+        if self.heater is not None:
+            output.append(f"heat " + on_off_value(self.heater))
+        if self.ventilator is not None:
+            output.append(f"vent " + on_off_value(self.ventilator))
         if self.recipe is not None:
             if self.recipe.day_temperature is not None:
                 output.append(f"recipe day {self.recipe.day_temperature}")

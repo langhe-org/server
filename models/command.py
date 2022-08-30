@@ -104,39 +104,37 @@ class LightingCommand(BaseModel):
         return output
 
 
-class IrrigationRecipeZoneCommand(BaseModel):
+class IrrigationRecipeCommand(BaseModel):
     start_window: time | None
     stop_window: time | None
     duration: timedelta | None
     frequency: timedelta | None
 
 
-class IrrigationRecipeCommand(BaseModel):
-    zones: List[IrrigationRecipeZoneCommand | None]
-
-
 class IrrigationCommand(BaseModel):
     mode: ControlMode | None
-    trigger_valve: int | None
-    recipe: IrrigationRecipeCommand | None
+    trigger_valve: List[bool | None] | None
+    recipes: List[IrrigationRecipeCommand | None] | None
 
     def to_controller_command(self) -> List[str]:
         output = []
         if self.mode is not None:
             output.append(f"mode " + control_mode_value(self.mode))
         if self.trigger_valve is not None:
-            output.append(f"valve " + on_off_value(self.trigger_valve))
-        if self.recipe is not None:
-            for i, zone in enumerate(self.recipe.zones): # TODO: add index to output
-                if zone is not None:
-                    if zone.start_window is not None:
-                        output.append(f"recipe {i} start {zone.start_window}") # TODO: format
-                    if zone.stop_window is not None:
-                        output.append(f"recipe {i} stop {zone.stop_window}") # TODO: format
-                    if zone.duration is not None:
-                        output.append(f"recipe {i} duration {zone.duration}") # TODO: format
-                    if zone.frequency is not None:
-                        output.append(f"recipe {i} frequency {zone.frequency}") # TODO: format
+            for i, trigger_valve in enumerate(self.trigger_valve):
+                if trigger_valve:
+                    output.append(f"valve {i} " + on_off_value(self.trigger_valve))
+        if self.recipes is not None:
+            for i, recipe in enumerate(self.recipes): # TODO: add index to output
+                if recipe is not None:
+                    if recipe.start_window is not None:
+                        output.append(f"recipe {i} start {recipe.start_window}") # TODO: format
+                    if recipe.stop_window is not None:
+                        output.append(f"recipe {i} stop {recipe.stop_window}") # TODO: format
+                    if recipe.duration is not None:
+                        output.append(f"recipe {i} duration {recipe.duration}") # TODO: format
+                    if recipe.frequency is not None:
+                        output.append(f"recipe {i} frequency {recipe.frequency}") # TODO: format
         return output
 
 

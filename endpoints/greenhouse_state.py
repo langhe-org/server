@@ -17,7 +17,6 @@ async def get(greenhouse_id):
         return state.to_greenhouse_state()
 
 
-# TODO: user_id should come from auth
 @app.post("/v1/greenhouse-state/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
 async def create(greenhouse_id: int, state: CreateGreenhouseState):
     with SessionManager() as db:

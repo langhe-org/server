@@ -1,4 +1,5 @@
 from endpoints.session_manager import SessionManager
+from endpoints.greenhouse_state import create as create_greenhouse_state
 from models.command import Command, ControllerCommand, CreateCommand, DbCommand
 from models.greenhouses_state import DbGreenhouseState, GreenhouseState, CreateGreenhouseState
 from .shared import app
@@ -48,3 +49,9 @@ def controller_request(greenhouse_id):
         db.commit()
 
         return output
+
+# RESTless API for Kyle
+@app.post("/v1/controller-ping/{greenhouse_id}", response_model=ControllerCommand)
+def controller_ping(greenhouse_id: int, greenhouse_state: CreateGreenhouseState):
+    create_greenhouse_state(greenhouse_id, greenhouse_state)
+    return controller_request(greenhouse_id)

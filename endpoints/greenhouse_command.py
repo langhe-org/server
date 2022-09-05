@@ -9,7 +9,7 @@ from fastapi import status
 
 
 @app.post("/v1/greenhouse-command/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
-async def something(greenhouse_id: int, command: CreateCommand):
+def something(greenhouse_id: int, command: CreateCommand):
     with SessionManager() as db:
         db_command = command.to_db_command(greenhouse_id)
         db.add(db_command)
@@ -17,7 +17,7 @@ async def something(greenhouse_id: int, command: CreateCommand):
 
 
 @app.post("/v1/greenhouse-command/{greenhouse_id}/controller-request", response_model=ControllerCommand)
-async def controller_request(greenhouse_id):
+def controller_request(greenhouse_id):
     with SessionManager() as db:
         query_filters = db.query(DbCommand)\
             .filter(DbCommand.greenhouse_id == greenhouse_id)\

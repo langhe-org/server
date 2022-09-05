@@ -7,7 +7,7 @@ from database import engine
 from fastapi import status
 
 @app.get("/v1/greenhouse-state/{greenhouse_id}", response_model=GreenhouseState)
-async def get(greenhouse_id):
+def get(greenhouse_id):
     with SessionManager() as db:
         state = db\
             .query(DbGreenhouseState)\
@@ -18,7 +18,7 @@ async def get(greenhouse_id):
 
 
 @app.post("/v1/greenhouse-state/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
-async def create(greenhouse_id: int, state: CreateGreenhouseState):
+def create(greenhouse_id: int, state: CreateGreenhouseState):
     with SessionManager() as db:
         db_state = state.to_db_greenhouse_state(greenhouse_id)
         db.add(db_state)

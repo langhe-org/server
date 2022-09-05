@@ -10,7 +10,7 @@ from models.users_greenhouse import DbUserGreenhouse
 from fastapi.security import HTTPAuthorizationCredentials
 
 @app.get("/v1/account", response_model=User)
-async def get(credentials: HTTPAuthorizationCredentials = Depends(security)):
+def get(credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
         db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()
@@ -27,7 +27,7 @@ async def get(credentials: HTTPAuthorizationCredentials = Depends(security)):
 
 
 @app.patch("/v1/account", response_model=User)
-async def update(user: UpdateUser, credentials: HTTPAuthorizationCredentials = Depends(security)):
+def update(user: UpdateUser, credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
         db.query(DbUser)\
@@ -42,7 +42,7 @@ async def update(user: UpdateUser, credentials: HTTPAuthorizationCredentials = D
 
 
 @app.post("/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
-async def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
+def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
         db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()

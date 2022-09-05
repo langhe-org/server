@@ -97,10 +97,15 @@ class LightingRecipe(BaseModel):
 
 
 class IrrigationRecipeZone(BaseModel):
-    start_window: time
-    stop_window: time
+    time: time
     duration: timedelta
-    frequency: timedelta
+    sunday: bool
+    monday: bool
+    tuesday: bool
+    wednesday: bool
+    thursday: bool
+    friday: bool
+    saturday: bool
 
 
 class IrrigationRecipe(BaseModel):
@@ -134,10 +139,15 @@ class GreenhouseState(BaseModel):
         irrigation_zones = list(map(
             lambda i: DbGreenhouseStateIrrigation(
                 valve=self.actuator.valves[i],
-                recipe_start_window=self.recipes.irrigation.zones[i].start_window,
-                recipe_stop_window=self.recipes.irrigation.zones[i].stop_window,
+                recipe_time=self.recipes.irrigation.zones[i].time,
                 recipe_duration=self.recipes.irrigation.zones[i].duration,
-                recipe_frequency=self.recipes.irrigation.zones[i].frequency,
+                recipe_sunday=self.recipes.irrigation.zones[i].sunday,
+                recipe_monday=self.recipes.irrigation.zones[i].monday,
+                recipe_tuesday=self.recipes.irrigation.zones[i].tuesday,
+                recipe_wednesday=self.recipes.irrigation.zones[i].wednesday,
+                recipe_thursday=self.recipes.irrigation.zones[i].thursday,
+                recipe_friday=self.recipes.irrigation.zones[i].friday,
+                recipe_saturday=self.recipes.irrigation.zones[i].saturday,
             ),
             range(len(self.actuator.valves)),
         ))
@@ -183,13 +193,18 @@ class DbGreenhouseStateIrrigation(Base):
     greenhouse_state_id = Column(Integer, ForeignKey("greenhouse_state.id"), nullable=False)
     greenhouse_state = relationship("DbGreenhouseState", back_populates="irrigation_zones")
     valve = Column(Boolean, nullable=False)
-    recipe_start_window = Column(Time, nullable=False)
-    recipe_stop_window = Column(Time, nullable=False)
-    recipe_duration = Column(postgresql.INTERVAL(), nullable=False)
-    recipe_frequency = Column(postgresql.INTERVAL(), nullable=False)
+    recipe_time = Column(Time, nullable=False)
+    recipe_duration = Column(Integer, nullable=False)
+    recipe_sunday = Column(Boolean, nullable=False)
+    recipe_monday = Column(Boolean, nullable=False)
+    recipe_tuesday = Column(Boolean, nullable=False)
+    recipe_wednesday = Column(Boolean, nullable=False)
+    recipe_thursday = Column(Boolean, nullable=False)
+    recipe_friday = Column(Boolean, nullable=False)
+    recipe_saturday = Column(Boolean, nullable=False)
 
     def __repr__(self):
-        return f"DbGreenhouseStateIrrigation(id={self.id!r}, greenhouse_state_id={self.greenhouse_state_id!r}, valve={self.valve!r}, recipe_start_window={self.recipe_start_window!r}, recipe_stop_window={self.recipe_stop_window!r}, recipe_duration={self.recipe_duration!r}"
+        return f"DbGreenhouseStateIrrigation(id={self.id!r}, greenhouse_state_id={self.greenhouse_state_id!r}, valve={self.valve!r}, time={self.time!r}, duration={self.duration!r}, sunday={self.sunday!r}, monday={self.monday!r}, tuesday={self.tuesday!r}, wednesday={self.wednesday!r}, thursday={self.thursday!r}, friday={self.friday!r}, saturday={self.saturday!r}"
 
 
 class DbGreenhouseState(Base):
@@ -232,10 +247,15 @@ class DbGreenhouseState(Base):
     def to_greenhouse_state(self) -> GreenhouseState:
         irrigation_recipe_zones = list(map(
             lambda irrigation_valve: IrrigationRecipeZone(
-                start_window=irrigation_valve.recipe_start_window,
-                stop_window=irrigation_valve.recipe_stop_window,
+                time=irrigation_valve.recipe_time,
                 duration=irrigation_valve.recipe_duration,
-                frequency=irrigation_valve.recipe_frequency,
+                sunday=irrigation_valve.recipe_sunday,
+                monday=irrigation_valve.recipe_monday,
+                tuesday=irrigation_valve.recipe_tuesday,
+                wednesday=irrigation_valve.recipe_wednesday,
+                thursday=irrigation_valve.recipe_thursday,
+                friday=irrigation_valve.recipe_friday,
+                saturday=irrigation_valve.recipe_saturday,
             ),
             self.irrigation_zones,
         ))
@@ -321,10 +341,15 @@ class CreateGreenhouseState(BaseModel):
         irrigation_zones = list(map(
             lambda i: DbGreenhouseStateIrrigation(
                 valve=self.actuator.valves[i],
-                recipe_start_window=self.recipes.irrigation.zones[i].start_window,
-                recipe_stop_window=self.recipes.irrigation.zones[i].stop_window,
+                recipe_time=self.recipes.irrigation.zones[i].time,
                 recipe_duration=self.recipes.irrigation.zones[i].duration,
-                recipe_frequency=self.recipes.irrigation.zones[i].frequency,
+                recipe_sunday=self.recipes.irrigation.zones[i].sunday,
+                recipe_monday=self.recipes.irrigation.zones[i].monday,
+                recipe_tuesday=self.recipes.irrigation.zones[i].tuesday,
+                recipe_wednesday=self.recipes.irrigation.zones[i].wednesday,
+                recipe_thursday=self.recipes.irrigation.zones[i].thursday,
+                recipe_friday=self.recipes.irrigation.zones[i].friday,
+                recipe_saturday=self.recipes.irrigation.zones[i].saturday,
             ),
             range(len(self.actuator.valves)),
         ))

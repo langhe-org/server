@@ -105,10 +105,15 @@ class LightingCommand(BaseModel):
 
 
 class IrrigationRecipeCommand(BaseModel):
-    start_window: time | None
-    stop_window: time | None
+    time: time | None
     duration: timedelta | None
-    frequency: timedelta | None
+    sunday: bool | None
+    monday: bool | None
+    tuesday: bool | None
+    wednesday: bool | None
+    thursday: bool | None
+    friday: bool | None
+    saturday: bool | None
 
 
 class IrrigationCommand(BaseModel):
@@ -127,14 +132,24 @@ class IrrigationCommand(BaseModel):
         if self.recipes is not None:
             for i, recipe in enumerate(self.recipes): # TODO: add index to output
                 if recipe is not None:
-                    if recipe.start_window is not None:
-                        output.append(f"recipe {i} start {recipe.start_window}") # TODO: format
-                    if recipe.stop_window is not None:
-                        output.append(f"recipe {i} stop {recipe.stop_window}") # TODO: format
+                    if recipe.time is not None:
+                        output.append(f"recipe {i} time {recipe.time}") # TODO: format
                     if recipe.duration is not None:
                         output.append(f"recipe {i} duration {recipe.duration}") # TODO: format
-                    if recipe.frequency is not None:
-                        output.append(f"recipe {i} frequency {recipe.frequency}") # TODO: format
+                    if recipe.sunday is not None:
+                        output.append(f"recipe {i} sunday {recipe.sunday}")
+                    if recipe.monday is not None:
+                        output.append(f"recipe {i} monday {recipe.monday}")
+                    if recipe.tuesday is not None:
+                        output.append(f"recipe {i} tuesday {recipe.tuesday}")
+                    if recipe.wednesday is not None:
+                        output.append(f"recipe {i} wednesday {recipe.wednesday}")
+                    if recipe.thursday is not None:
+                        output.append(f"recipe {i} thursday {recipe.thursday}")
+                    if recipe.friday is not None:
+                        output.append(f"recipe {i} friday {recipe.friday}")
+                    if recipe.saturday is not None:
+                        output.append(f"recipe {i} saturday {recipe.saturday}")
         return output
 
 

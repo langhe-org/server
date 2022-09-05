@@ -12,7 +12,7 @@ import os
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 
 @app.post("/v1/auth/google", response_model=User)
-async def get_body(credentials: HTTPAuthorizationCredentials = Depends(security)):
+def get_body(credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
         user = get_user_create_if_not_exist(db, jwt)

@@ -1,9 +1,10 @@
+from math import floor
 from sqlalchemy import Column, ForeignKey, Integer, Boolean, DateTime, func
 from sqlalchemy.dialects.postgresql import JSON
 from typing import List
 from .db_base import Base
 from pydantic import BaseModel
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from models.greenhouses_state import ControlMode, LightingRecipeIntensity, SulfurIntensity
 from fastapi.encoders import jsonable_encoder
 import json
@@ -15,12 +16,25 @@ def on_off_value(v: bool) -> str:
     else:
         return "off"
 
+
 def control_mode_value(v: ControlMode) -> str:
     match v:
         case ControlMode.automatic:
             return "auto"
         case ControlMode.manual:
             return "manual"
+
+
+# number of seconds from midnight
+def time_value(t: time) -> int:
+    t = datetime.combine(date.today(), t)
+    midnight = datetime.combine(date.today(), time(0, 0))
+    delta: timedelta = t - midnight
+    return floor(delta.total_seconds())
+
+
+def timedelta_value(td: timedelta) -> int:
+    return floor(td.total_seconds())
 
 
 class EnvironmentRecipeCommand(BaseModel):
@@ -96,9 +110,9 @@ class LightingCommand(BaseModel):
             output.append(f"light " + on_off_value(self.light))
         if self.recipe is not None:
             if self.recipe.start_at is not None:
-                output.append(f"recipe start {self.recipe.start_at}") # TODO: format the way he wants it
+                output.append(f"recipe start {time_value(self.recipe.start_at)}")
             if self.recipe.stop_at is not None:
-                output.append(f"recipe stop {self.recipe.stop_at}") # TODO:
+                output.append(f"recipe stop {time_value(self.recipe.stop_at)}")
             if self.recipe.intensity is not None:
                 output.append(f"recipe intensity {self.recipe.intensity}")
         return output
@@ -130,12 +144,12 @@ class IrrigationCommand(BaseModel):
                 if trigger_valve:
                     output.append(f"valve {i} " + on_off_value(self.trigger_valve))
         if self.recipes is not None:
-            for i, recipe in enumerate(self.recipes): # TODO: add index to output
+            for i, recipe in enumerate(self.recipes):
                 if recipe is not None:
                     if recipe.time is not None:
-                        output.append(f"recipe {i} time {recipe.time}") # TODO: format
+                        output.append(f"recipe {i} time {time_value(recipe.time)}")
                     if recipe.duration is not None:
-                        output.append(f"recipe {i} duration {recipe.duration}") # TODO: format
+                        output.append(f"recipe {i} duration {timedelta_value(recipe.duration)}")
                     if recipe.sunday is not None:
                         output.append(f"recipe {i} sunday {recipe.sunday}")
                     if recipe.monday is not None:

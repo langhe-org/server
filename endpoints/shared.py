@@ -8,7 +8,7 @@ app = FastAPI()
 # TODO: should be in a config
 origins = [
     "http://localhost:3000",
-    "https://860007-proto2-webapp.vercel.app"
+    "https://www.langhe.app"
 ]
 
 app.add_middleware(

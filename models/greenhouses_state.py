@@ -14,20 +14,20 @@ class ControlMode(enum.Enum):
     manual = "manual"
 
 
-class EnvironmentState(enum.Enum):
-    default = "default"
+class EnvironmentControl(BaseModel):
+    mode: ControlMode
 
 
-class IpmState(enum.Enum):
-    default = "default"
+class IpmControl(BaseModel):
+    mode: ControlMode
 
 
-class IrrigationState(enum.Enum):
-    default = "default"
+class IrrigationControl(BaseModel):
+    mode: ControlMode
 
 
-class LightningState(enum.Enum):
-    default = "default"
+class LightingControl(BaseModel):
+    mode: ControlMode
 
 
 class Sensor(BaseModel):
@@ -35,17 +35,12 @@ class Sensor(BaseModel):
     humidity: float = None
     quantum : float = None
 
-StateT = TypeVar('StateT')
-class Subsystem(GenericModel,  Generic[StateT]):
-    mode: ControlMode
-    state: StateT
-
 
 class Control(BaseModel):
-    environment: Subsystem[EnvironmentState]
-    ipm: Subsystem[IpmState]
-    lighting: Subsystem[LightningState]
-    irrigation: Subsystem[IrrigationState]
+    environment: EnvironmentControl
+    ipm: IpmControl
+    lighting: LightingControl
+    irrigation: IrrigationControl
 
 
 class Actuator(BaseModel):
@@ -160,20 +155,16 @@ class GreenhouseState(BaseModel):
             humidity=self.sensor.humidity,
             quantum=self.sensor.quantum,
             environment_mode=self.control.environment.mode,
-            environment_state=self.control.environment.state,
             environment_recipe_day_temperature=self.recipes.environment.day_temperature,
             environment_recipe_night_temperature=self.recipes.environment.night_temperature,
             environment_recipe_humidity_limit=self.recipes.environment.humidity_limit,
             ipm_mode=self.control.ipm.mode,
-            ipm_state=self.control.ipm.state,
             ipm_recipe_intensity=self.recipes.ipm.intensity,
             lighting_mode=self.control.lighting.mode,
-            lighting_state=self.control.lighting.state,
             lighting_recipe_start_at=self.recipes.lighting.start_at,
             lighting_recipe_stop_at=self.recipes.lighting.stop_at,
             lighting_recipe_intensity=self.recipes.lighting.intensity,
             irrigation_mode=self.control.irrigation.mode,
-            irrigation_state=self.control.irrigation.state,
             irrigation_zones=irrigation_zones,
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
@@ -217,20 +208,16 @@ class DbGreenhouseState(Base):
     humidity = Column(Float, nullable=False)
     quantum = Column(Float, nullable=False)
     environment_mode = Column(Enum(ControlMode), nullable=False)
-    environment_state = Column(Enum(EnvironmentState), nullable=False)
     environment_recipe_day_temperature = Column(Float, nullable=False)
     environment_recipe_night_temperature = Column(Float, nullable=False)
     environment_recipe_humidity_limit = Column(Float, nullable=False)
     ipm_mode = Column(Enum(ControlMode), nullable=False)
-    ipm_state = Column(Enum(IpmState), nullable=False)
     ipm_recipe_intensity = Column(Enum(SulfurIntensity), nullable=False)
     lighting_mode = Column(Enum(ControlMode), nullable=False)
-    lighting_state = Column(Enum(LightningState), nullable=False)
     lighting_recipe_start_at = Column(Time, nullable=False)
     lighting_recipe_stop_at = Column(Time, nullable=False)
     lighting_recipe_intensity = Column(Enum(LightingRecipeIntensity), nullable=False)
     irrigation_mode = Column(Enum(ControlMode), nullable=False)
-    irrigation_state = Column(Enum(IrrigationState), nullable=False)
     irrigation_zones = relationship("DbGreenhouseStateIrrigation", back_populates="greenhouse_state")
     heater = Column(Boolean, nullable=False)
     exhaust = Column(Boolean, nullable=False)
@@ -242,7 +229,7 @@ class DbGreenhouseState(Base):
     weather_sky = Column(String, nullable=True)
 
     def __repr__(self):
-        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_state={self.environment_state!r}, environment_recipe_day_temperature={self.environment_recipe_day_temperature!r}, environment_recipe_night_temperature={self.environment_recipe_night_temperature!r}, environment_recipe_humidity_limit={self.environment_recipe_humidity_limit!r}, ipm_mode={self.ipm_mode!r}, ipm_state={self.ipm_state!r}, ipm_recipe_intensity={self.ipm_recipe_intensity!r}, lighting_mode={self.lighting_mode!r}, lighting_state={self.lighting_state!r}, lighting_recipe_start_at={self.lighting_recipe_start_at!r}, lighting_recipe_stop_at={self.lighting_recipe_stop_at!r}, lighting_recipe_intensity={self.lighting_recipe_intensity!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_state={self.irrigation_state!r}, irrigation_zones={self.irrigation_zones!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, lights={self.lights!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
+        return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_recipe_day_temperature={self.environment_recipe_day_temperature!r}, environment_recipe_night_temperature={self.environment_recipe_night_temperature!r}, environment_recipe_humidity_limit={self.environment_recipe_humidity_limit!r}, ipm_mode={self.ipm_mode!r}, ipm_recipe_intensity={self.ipm_recipe_intensity!r}, lighting_mode={self.lighting_mode!r}, lighting_recipe_start_at={self.lighting_recipe_start_at!r}, lighting_recipe_stop_at={self.lighting_recipe_stop_at!r}, lighting_recipe_intensity={self.lighting_recipe_intensity!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_zones={self.irrigation_zones!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, lights={self.lights!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
 
     def to_greenhouse_state(self) -> GreenhouseState:
         irrigation_recipe_zones = list(map(
@@ -274,21 +261,17 @@ class DbGreenhouseState(Base):
                 quantum=self.quantum,
             ),
             control=Control(
-                environment=Subsystem(
+                environment=EnvironmentControl(
                     mode=self.environment_mode,
-                    state=self.environment_state.name,
                 ),
-                ipm=Subsystem(
+                ipm=IpmControl(
                     mode=self.ipm_mode,
-                    state=self.ipm_state.name,
                 ),
-                lighting=Subsystem(
+                lighting=LightingControl(
                     mode=self.lighting_mode,
-                    state=self.lighting_state.name,
                 ),
-                irrigation=Subsystem(
+                irrigation=IrrigationControl(
                     mode=self.irrigation_mode,
-                    state=self.irrigation_state.name,
                 ),
             ),
             recipes=Recipes(
@@ -360,20 +343,16 @@ class CreateGreenhouseState(BaseModel):
             humidity=self.sensor.humidity,
             quantum=self.sensor.quantum,
             environment_mode=self.control.environment.mode,
-            environment_state=self.control.environment.state,
             environment_recipe_day_temperature=self.recipes.environment.day_temperature,
             environment_recipe_night_temperature=self.recipes.environment.night_temperature,
             environment_recipe_humidity_limit=self.recipes.environment.humidity_limit,
             ipm_mode=self.control.ipm.mode,
-            ipm_state=self.control.ipm.state,
             ipm_recipe_intensity=self.recipes.ipm.intensity,
             lighting_mode=self.control.lighting.mode,
-            lighting_state=self.control.lighting.state,
             lighting_recipe_start_at=self.recipes.lighting.start_at,
             lighting_recipe_stop_at=self.recipes.lighting.stop_at,
             lighting_recipe_intensity=self.recipes.lighting.intensity,
             irrigation_mode=self.control.irrigation.mode,
-            irrigation_state=self.control.irrigation.state,
             irrigation_zones=irrigation_zones,
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,

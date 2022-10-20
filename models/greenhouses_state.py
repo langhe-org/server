@@ -42,6 +42,29 @@ class Control(BaseModel):
     lighting: LightingControl
     irrigation: IrrigationControl
 
+class EnvironmentStatus(BaseModel):
+    pass
+
+
+class IpmStatus(BaseModel):
+    next_time: datetime = None
+
+
+class LightingStatus(BaseModel):
+    dli: float = None
+
+
+class IrrigationStatus(BaseModel):
+    next_time: datetime = None
+    next_zone: int = None
+
+
+class Status(BaseModel):
+    environment: EnvironmentStatus
+    ipm: IpmStatus
+    lighting: LightingStatus
+    irrigation: IrrigationStatus
+
 
 class Actuator(BaseModel):
     heater: bool
@@ -121,6 +144,7 @@ class GreenhouseState(BaseModel):
     time: datetime
     sensor: Sensor = None
     control: Control
+    status: Status
     recipes: Recipes
     actuator: Actuator
     weather: Weather = None
@@ -162,12 +186,16 @@ class GreenhouseState(BaseModel):
             environment_recipe_humidity_limit=self.recipes.environment.humidity_limit,
             ipm_mode=self.control.ipm.mode,
             ipm_recipe_intensity=self.recipes.ipm.intensity,
+            ipm_status_next_time=self.status.ipm.next_time,
             lighting_mode=self.control.lighting.mode,
             lighting_recipe_start_at=self.recipes.lighting.start_at,
             lighting_recipe_stop_at=self.recipes.lighting.stop_at,
             lighting_recipe_intensity=self.recipes.lighting.intensity,
+            lighting_status_dli=self.status.lighting.dli,
             irrigation_mode=self.control.irrigation.mode,
             irrigation_zones=irrigation_zones,
+            irrigation_status_next_time=self.status.irrigation.next_time,
+            irrigation_status_next_zone=self.status.irrigation.next_zone,
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
             ventilator=self.actuator.ventilator,
@@ -216,12 +244,16 @@ class DbGreenhouseState(Base):
     environment_recipe_humidity_limit = Column(Float, nullable=False)
     ipm_mode = Column(Enum(ControlMode), nullable=False)
     ipm_recipe_intensity = Column(Enum(SulfurIntensity), nullable=False)
+    ipm_status_next_time = Column(DateTime, nullable=True)
     lighting_mode = Column(Enum(ControlMode), nullable=False)
     lighting_recipe_start_at = Column(Time, nullable=False)
     lighting_recipe_stop_at = Column(Time, nullable=False)
     lighting_recipe_intensity = Column(Enum(LightingRecipeIntensity), nullable=False)
+    lighting_status_dli = Column(Float, nullable=True)
     irrigation_mode = Column(Enum(ControlMode), nullable=False)
     irrigation_zones = relationship("DbGreenhouseStateIrrigation", back_populates="greenhouse_state")
+    irrigation_status_next_time = Column(DateTime, nullable=True)
+    irrigation_status_next_zone = Column(Integer, nullable=True)
     heater = Column(Boolean, nullable=False)
     exhaust = Column(Boolean, nullable=False)
     ventilator = Column(Boolean, nullable=False)
@@ -278,6 +310,19 @@ class DbGreenhouseState(Base):
                     mode=self.irrigation_mode,
                 ),
             ),
+            status=Status(
+                environment=EnvironmentStatus(),
+                ipm=IpmStatus(
+                    next_time=self.ipm_status_next_time,
+                ),
+                lighting=LightingStatus(
+                    dli=self.lighting_status_dli,
+                ),
+                irrigation=IrrigationStatus(
+                    next_time=self.irrigation_status_next_time,
+                    next_zone=self.irrigation_status_next_zone,
+                ),
+            ),
             recipes=Recipes(
                 environment = EnvironmentRecipe(
                     day_temperature=self.environment_recipe_day_temperature,
@@ -317,6 +362,7 @@ class DbGreenhouseState(Base):
 class CreateGreenhouseState(BaseModel):
     sensor: Sensor = None
     control: Control
+    status: Status
     recipes: Recipes
     actuator: Actuator
     weather: Weather = None
@@ -353,12 +399,16 @@ class CreateGreenhouseState(BaseModel):
             environment_recipe_humidity_limit=self.recipes.environment.humidity_limit,
             ipm_mode=self.control.ipm.mode,
             ipm_recipe_intensity=self.recipes.ipm.intensity,
+            ipm_status_next_time=self.status.ipm.next_time,
             lighting_mode=self.control.lighting.mode,
             lighting_recipe_start_at=self.recipes.lighting.start_at,
             lighting_recipe_stop_at=self.recipes.lighting.stop_at,
             lighting_recipe_intensity=self.recipes.lighting.intensity,
+            lighting_status_dli=self.status.lighting.dli,
             irrigation_mode=self.control.irrigation.mode,
             irrigation_zones=irrigation_zones,
+            irrigation_status_next_time=self.status.irrigation.next_time,
+            irrigation_status_next_zone=self.status.irrigation.next_zone,
             heater=self.actuator.heater,
             exhaust=self.actuator.exhaust,
             ventilator=self.actuator.ventilator,

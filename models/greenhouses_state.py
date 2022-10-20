@@ -92,6 +92,7 @@ class LightingRecipe(BaseModel):
 
 
 class IrrigationRecipeZone(BaseModel):
+    name: str
     time: time
     duration: timedelta
     sunday: bool
@@ -134,6 +135,7 @@ class GreenhouseState(BaseModel):
         irrigation_zones = list(map(
             lambda i: DbGreenhouseStateIrrigation(
                 valve=self.actuator.valves[i],
+                recipe_name=self.recipes.irrigation.zones[i].name,
                 recipe_time=self.recipes.irrigation.zones[i].time,
                 recipe_duration=self.recipes.irrigation.zones[i].duration,
                 recipe_sunday=self.recipes.irrigation.zones[i].sunday,
@@ -184,6 +186,7 @@ class DbGreenhouseStateIrrigation(Base):
     greenhouse_state_id = Column(Integer, ForeignKey("greenhouse_state.id"), nullable=False)
     greenhouse_state = relationship("DbGreenhouseState", back_populates="irrigation_zones")
     valve = Column(Boolean, nullable=False)
+    recipe_name = Column(String, nullable=False)
     recipe_time = Column(Time, nullable=False)
     recipe_duration = Column(Integer, nullable=False)
     recipe_sunday = Column(Boolean, nullable=False)
@@ -234,6 +237,7 @@ class DbGreenhouseState(Base):
     def to_greenhouse_state(self) -> GreenhouseState:
         irrigation_recipe_zones = list(map(
             lambda irrigation_valve: IrrigationRecipeZone(
+                name=irrigation_valve.recipe_name,
                 time=irrigation_valve.recipe_time,
                 duration=irrigation_valve.recipe_duration,
                 sunday=irrigation_valve.recipe_sunday,
@@ -324,6 +328,7 @@ class CreateGreenhouseState(BaseModel):
         irrigation_zones = list(map(
             lambda i: DbGreenhouseStateIrrigation(
                 valve=self.actuator.valves[i],
+                recipe_name=self.recipes.irrigation.zones[i].name,
                 recipe_time=self.recipes.irrigation.zones[i].time,
                 recipe_duration=self.recipes.irrigation.zones[i].duration,
                 recipe_sunday=self.recipes.irrigation.zones[i].sunday,

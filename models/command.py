@@ -141,29 +141,33 @@ class IrrigationCommand(BaseModel):
             output.append(f"mode " + control_mode_value(self.mode))
         if self.trigger_valve is not None:
             for i, trigger_valve in enumerate(self.trigger_valve):
+                # use one-indexing
+                zone = i + 1
                 if trigger_valve:
                     output.append(f"valve {i} " + on_off_value(self.trigger_valve))
         if self.recipes is not None:
             for i, recipe in enumerate(self.recipes):
+                # use one-indexing
+                zone = i + 1
                 if recipe is not None:
                     if recipe.time is not None:
-                        output.append(f"recipe {i} time {time_value(recipe.time)}")
+                        output.append(f"recipe {zone} time {time_value(recipe.time)}")
                     if recipe.duration is not None:
-                        output.append(f"recipe {i} duration {timedelta_value(recipe.duration)}")
+                        output.append(f"recipe {zone} duration {timedelta_value(recipe.duration)}")
                     if recipe.sunday is not None:
-                        output.append(f"recipe {i} sunday {recipe.sunday}")
+                        output.append(f"recipe {zone} sunday {recipe.sunday}")
                     if recipe.monday is not None:
-                        output.append(f"recipe {i} monday {recipe.monday}")
+                        output.append(f"recipe {zone} monday {recipe.monday}")
                     if recipe.tuesday is not None:
-                        output.append(f"recipe {i} tuesday {recipe.tuesday}")
+                        output.append(f"recipe {zone} tuesday {recipe.tuesday}")
                     if recipe.wednesday is not None:
-                        output.append(f"recipe {i} wednesday {recipe.wednesday}")
+                        output.append(f"recipe {zone} wednesday {recipe.wednesday}")
                     if recipe.thursday is not None:
-                        output.append(f"recipe {i} thursday {recipe.thursday}")
+                        output.append(f"recipe {zone} thursday {recipe.thursday}")
                     if recipe.friday is not None:
-                        output.append(f"recipe {i} friday {recipe.friday}")
+                        output.append(f"recipe {zone} friday {recipe.friday}")
                     if recipe.saturday is not None:
-                        output.append(f"recipe {i} saturday {recipe.saturday}")
+                        output.append(f"recipe {zone} saturday {recipe.saturday}")
         return output
 
 

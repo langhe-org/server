@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Enum
+from sqlalchemy import Column, String, Integer, Float, Enum
 import enum
 from .db_base import Base
 from pydantic import BaseModel
@@ -13,8 +13,8 @@ class Greenhouse(BaseModel):
     name: str = None
     type: GreenhouseType
     location_name: str = None
-    longitude: int
-    latitude: int
+    longitude: float
+    latitude: float
     timezone: str
 
     class Config:
@@ -31,8 +31,8 @@ class DbGreenhouse(Base):
     name = Column(String, nullable=True)
     type = Column(Enum(GreenhouseType), nullable=False)
     location_name = Column(String, nullable=False)
-    longitude = Column(Integer, nullable=False)
-    latitude = Column(Integer, nullable=False)
+    longitude = Column(Float, nullable=False)
+    latitude = Column(Float, nullable=False)
     timezone = Column(String, nullable=False)
 
     def __repr__(self) -> str:
@@ -46,8 +46,8 @@ class CreateGreenhouse(BaseModel):
     name: str = None
     type: GreenhouseType
     location_name: str = None
-    longitude: int
-    latitude: int
+    longitude: float
+    latitude: float
     timezone: str
 
     class Config:
@@ -60,8 +60,8 @@ class CreateGreenhouse(BaseModel):
 class UpdateGreenhouse(BaseModel):
     name: str = None
     location_name: str = None
-    longitude: int = None
-    latitude: int = None
+    longitude: float = None
+    latitude: float = None
     timezone: str = None
 
     class Config:

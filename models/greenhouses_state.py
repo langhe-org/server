@@ -1,3 +1,4 @@
+from operator import index
 from sqlalchemy import Column, ForeignKey, Integer, Float, Boolean, DateTime, Time, String, Enum, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import postgresql
@@ -158,6 +159,7 @@ class GreenhouseState(BaseModel):
 
         irrigation_zones = list(map(
             lambda i: DbGreenhouseStateIrrigation(
+                index=i,
                 valve=self.actuator.valves[i],
                 recipe_name=self.recipes.irrigation.zones[i].name,
                 recipe_time=self.recipes.irrigation.zones[i].time,
@@ -213,6 +215,7 @@ class DbGreenhouseStateIrrigation(Base):
     id = Column(Integer, primary_key=True)
     greenhouse_state_id = Column(Integer, ForeignKey("greenhouse_state.id"), nullable=False)
     greenhouse_state = relationship("DbGreenhouseState", back_populates="irrigation_zones")
+    index = Column(Integer, nullable=False)
     valve = Column(Boolean, nullable=False)
     recipe_name = Column(String, nullable=False)
     recipe_time = Column(Time, nullable=False)
@@ -251,7 +254,7 @@ class DbGreenhouseState(Base):
     lighting_recipe_intensity = Column(Enum(LightingRecipeIntensity), nullable=False)
     lighting_status_dli = Column(Float, nullable=True)
     irrigation_mode = Column(Enum(ControlMode), nullable=False)
-    irrigation_zones = relationship("DbGreenhouseStateIrrigation", back_populates="greenhouse_state")
+    irrigation_zones = relationship("DbGreenhouseStateIrrigation", back_populates="greenhouse_state", order_by="DbGreenhouseStateIrrigation.index")
     irrigation_status_next_time = Column(DateTime, nullable=True)
     irrigation_status_next_zone = Column(Integer, nullable=True)
     heater = Column(Boolean, nullable=False)
@@ -373,6 +376,7 @@ class CreateGreenhouseState(BaseModel):
 
         irrigation_zones = list(map(
             lambda i: DbGreenhouseStateIrrigation(
+                index=i,
                 valve=self.actuator.valves[i],
                 recipe_name=self.recipes.irrigation.zones[i].name,
                 recipe_time=self.recipes.irrigation.zones[i].time,

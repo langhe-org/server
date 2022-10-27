@@ -119,6 +119,7 @@ class LightingCommand(BaseModel):
 
 
 class IrrigationRecipeCommand(BaseModel):
+    name: str | None
     time: time | None
     duration: timedelta | None
     sunday: bool | None
@@ -150,6 +151,8 @@ class IrrigationCommand(BaseModel):
                 # use one-indexing
                 zone = i + 1
                 if recipe is not None:
+                    if recipe.name is not None:
+                        output.append(f"recipe {zone} name \"{recipe.name}\"")
                     if recipe.time is not None:
                         output.append(f"recipe {zone} time {time_value(recipe.time)}")
                     if recipe.duration is not None:

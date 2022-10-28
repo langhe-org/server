@@ -25,6 +25,28 @@ def control_mode_value(v: ControlMode) -> str:
             return "manual"
 
 
+def sulfur_intensity_value(v: SulfurIntensity) -> str:
+    match v:
+        case SulfurIntensity.off:
+            return "off"
+        case SulfurIntensity.low:
+            return "low"
+        case SulfurIntensity.medium:
+            return "medium"
+        case SulfurIntensity.high:
+            return "high"
+
+
+def lighting_recipe_intensity_value(v: LightingRecipeIntensity) -> str:
+    match v:
+        case LightingRecipeIntensity.low:
+            return "low"
+        case LightingRecipeIntensity.medium:
+            return "medium"
+        case LightingRecipeIntensity.high:
+            return "high"
+
+
 # number of seconds from midnight
 def time_value(t: time) -> int:
     t = datetime.combine(date.today(), t)
@@ -87,7 +109,7 @@ class IpmCommand(BaseModel):
             output.append(f"sulfur " + on_off_value(self.sulfur))
         if self.recipe is not None:
             if self.recipe.intensity is not None:
-                output.append(f"recipe intensity {self.recipe.intensity}")
+                output.append(f"recipe intensity {sulfur_intensity_value(self.recipe.intensity)}")
         return output
 
 
@@ -114,7 +136,7 @@ class LightingCommand(BaseModel):
             if self.recipe.stop_at is not None:
                 output.append(f"recipe stop {time_value(self.recipe.stop_at)}")
             if self.recipe.intensity is not None:
-                output.append(f"recipe intensity {self.recipe.intensity}")
+                output.append(f"recipe intensity {lighting_recipe_intensity_value(self.recipe.intensity)}")
         return output
 
 

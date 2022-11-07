@@ -167,7 +167,7 @@ class IrrigationCommand(BaseModel):
                 # use one-indexing
                 zone = i + 1
                 if trigger_valve:
-                    output.append(f"valve {i} " + on_off_value(self.trigger_valve))
+                    output.append(f"valve {zone} " + on_off_value(self.trigger_valve))
         if self.recipes is not None:
             for i, recipe in enumerate(self.recipes):
                 # use one-indexing

@@ -56,3 +56,20 @@ def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredential
 
         db.add(DbUserGreenhouse(user_id=db_user.id, greenhouse_id=greenhouse_id))
         db.commit()
+
+@app.delete("/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
+def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    jwt = ensure_valid_jwt(credentials)
+    with SessionManager() as db:
+        db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()
+
+        relation = db.query(DbUserGreenhouse)\
+            .filter(DbUserGreenhouse.user_id == db_user.id)\
+            .filter(DbUserGreenhouse.greenhouse_id == greenhouse_id)\
+            .scalar()
+
+        if not relation:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        
+        db.delete(relation)
+        db.commit()

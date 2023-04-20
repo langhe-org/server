@@ -6,7 +6,7 @@ from models.greenhouse import DbGreenhouse, Greenhouse, CreateGreenhouse, Update
 
 
 @app.get("/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
-def create(greenhouse_id: int):
+def get(greenhouse_id: int):
     with SessionManager() as db:
         db_greenhouse = db.query(DbGreenhouse).filter(DbGreenhouse.id == greenhouse_id).first()
         return db_greenhouse.to_greenhouse()

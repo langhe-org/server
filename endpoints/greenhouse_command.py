@@ -10,7 +10,7 @@ from fastapi import status
 
 
 @app.post("/v1/greenhouse-command/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
-def something(greenhouse_id: int, command: CreateCommand):
+def create(greenhouse_id: int, command: CreateCommand):
     with SessionManager() as db:
         db_command = command.to_db_command(greenhouse_id)
         db.add(db_command)
@@ -50,7 +50,7 @@ def controller_request(greenhouse_id):
 
         return output
 
-# RESTless API for Kyle
+# RESTless API for controller (requested by Kyle)
 @app.post("/v1/controller-ping/{greenhouse_id}", response_model=ControllerCommand)
 def controller_ping(greenhouse_id: int, greenhouse_state: CreateGreenhouseState):
     create_greenhouse_state(greenhouse_id, greenhouse_state)

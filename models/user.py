@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import Column, Integer, Enum, String
+from sqlalchemy import Column, ForeignKey, Integer, Enum, String
 import enum
 from pydantic import BaseModel, EmailStr
 
@@ -46,3 +46,17 @@ class UpdateUser(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PermissionType(enum.Enum):
+    admin = "admin"
+
+class DbPermission(Base):
+    __tablename__ = "permission"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    permission = Column(Enum(PermissionType), nullable=False)
+
+    def __repr__(self):
+        return f"Permission(id={self.id!r}, user_id={self.user_id!r}, permission={self.permission!r})"

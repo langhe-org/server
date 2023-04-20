@@ -1,8 +1,11 @@
+from fastapi import Depends
 from endpoints.session_manager import SessionManager
-from .shared import app
+from endpoints.utils import ensure_valid_admin_jwt, ensure_valid_greenhouse_owner_jwt
+from .shared import app, security
 from sqlalchemy.orm import Session
 from database import engine
 from models.greenhouse import DbGreenhouse, Greenhouse, CreateGreenhouse, UpdateGreenhouse
+from fastapi.security import HTTPAuthorizationCredentials
 
 
 @app.get("/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
@@ -12,9 +15,9 @@ def get(greenhouse_id: int):
         return db_greenhouse.to_greenhouse()
 
 
-# TODO: restrict to admin
 @app.post("/v1/greenhouse", response_model=Greenhouse)
-def create(greenhouse: CreateGreenhouse):
+def create(greenhouse: CreateGreenhouse, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    ensure_valid_admin_jwt(credentials)
     with SessionManager() as db:
         db_greenhouse = greenhouse.to_db_greenhouse()
         db.add(db_greenhouse)
@@ -24,7 +27,8 @@ def create(greenhouse: CreateGreenhouse):
 
 
 @app.patch("/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
-def update(greenhouse_id: int, greenhouse: UpdateGreenhouse):
+def update(greenhouse_id: int, greenhouse: UpdateGreenhouse, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    ensure_valid_greenhouse_owner_jwt(credentials, greenhouse_id)
     with SessionManager() as db:
         db.query(DbGreenhouse)\
             .filter(DbGreenhouse.id == greenhouse_id)\

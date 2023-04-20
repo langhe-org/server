@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from endpoints.session_manager import SessionManager
 from .shared import app, security
-from .utils import ensure_valid_jwt
+from .utils import ensure_valid_jwt, ensure_valid_greenhouse_owner_jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import engine
@@ -59,7 +59,7 @@ def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredential
 
 @app.delete("/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
 def unlink_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
-    jwt = ensure_valid_jwt(credentials)
+    jwt = ensure_valid_greenhouse_owner_jwt(credentials)
     with SessionManager() as db:
         db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()
 

@@ -1,10 +1,12 @@
 from endpoints.session_manager import SessionManager
+from endpoints.utils import ensure_valid_greenhouse_owner_jwt
 from models.greenhouses_state import DbGreenhouseState, GreenhouseState, CreateGreenhouseState
-from .shared import app
+from .shared import app, security
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import engine
-from fastapi import status
+from fastapi import Depends, status
+from fastapi.security import HTTPAuthorizationCredentials
 
 @app.get("/v1/greenhouse-state/{greenhouse_id}", response_model=GreenhouseState)
 def get(greenhouse_id):

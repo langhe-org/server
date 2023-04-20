@@ -28,7 +28,7 @@ def update(greenhouse_id: int, greenhouse: UpdateGreenhouse):
     with SessionManager() as db:
         db.query(DbGreenhouse)\
             .filter(DbGreenhouse.id == greenhouse_id)\
-            .update(greenhouse.__dict__)
+            .update(dict(greenhouse))
         db.commit()
 
         db_greenhouse = db.query(DbGreenhouse).filter(DbGreenhouse.id == greenhouse_id).first()

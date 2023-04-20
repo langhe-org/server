@@ -270,25 +270,20 @@ class DbGreenhouseState(Base):
         return f"GreenhouseState(id={self.id!r}, greenhouse_id={self.greenhouse_id!r}, time={self.time!r}, temperature={self.temperature!r}, humidity={self.humidity!r}, quantum={self.quantum!r}, environment_mode={self.environment_mode!r}, environment_recipe_day_temperature={self.environment_recipe_day_temperature!r}, environment_recipe_night_temperature={self.environment_recipe_night_temperature!r}, environment_recipe_humidity_limit={self.environment_recipe_humidity_limit!r}, ipm_mode={self.ipm_mode!r}, ipm_recipe_intensity={self.ipm_recipe_intensity!r}, lighting_mode={self.lighting_mode!r}, lighting_recipe_start_at={self.lighting_recipe_start_at!r}, lighting_recipe_stop_at={self.lighting_recipe_stop_at!r}, lighting_recipe_intensity={self.lighting_recipe_intensity!r}, irrigation_mode={self.irrigation_mode!r}, irrigation_zones={self.irrigation_zones!r}, heater={self.heater!r}, exhaust={self.exhaust!r}, ventilator={self.ventilator!r}, sulfur={self.sulfur!r}, lights={self.lights!r}, weather_temperature={self.weather_temperature!r}, weather_humidity={self.weather_humidity!r}, weather_sky={self.weather_sky!r}"
 
     def to_greenhouse_state(self) -> GreenhouseState:
-        irrigation_recipe_zones = list(map(
-            lambda irrigation_valve: IrrigationRecipeZone(
-                name=irrigation_valve.recipe_name,
-                time=irrigation_valve.recipe_time,
-                duration=irrigation_valve.recipe_duration,
-                sunday=irrigation_valve.recipe_sunday,
-                monday=irrigation_valve.recipe_monday,
-                tuesday=irrigation_valve.recipe_tuesday,
-                wednesday=irrigation_valve.recipe_wednesday,
-                thursday=irrigation_valve.recipe_thursday,
-                friday=irrigation_valve.recipe_friday,
-                saturday=irrigation_valve.recipe_saturday,
-            ),
-            self.irrigation_zones,
-        ))
-        irrigation_zones = list(map(
-            lambda irrigation_valve: irrigation_valve.valve,
-            self.irrigation_zones,
-        ))
+        irrigation_recipe_zones = [IrrigationRecipeZone(
+            name=irrigation_valve.recipe_name,
+            time=irrigation_valve.recipe_time,
+            duration=irrigation_valve.recipe_duration,
+            sunday=irrigation_valve.recipe_sunday,
+            monday=irrigation_valve.recipe_monday,
+            tuesday=irrigation_valve.recipe_tuesday,
+            wednesday=irrigation_valve.recipe_wednesday,
+            thursday=irrigation_valve.recipe_thursday,
+            friday=irrigation_valve.recipe_friday,
+            saturday=irrigation_valve.recipe_saturday,
+        ) for irrigation_valve in self.irrigation_zones]
+
+        irrigation_zones = [ zone.valve for zone in self.irrigation_zones]
 
         return GreenhouseState(
             id=self.id,

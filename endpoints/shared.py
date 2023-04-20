@@ -1,15 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
-
+import os
 
 app = FastAPI()
 
-# TODO: should be in a config
-origins = [
-    "http://localhost:3000",
-    "https://www.langhe.app"
-]
+origins = os.getenv('ORIGINS').split(" ")
 
 app.add_middleware(
     CORSMiddleware,

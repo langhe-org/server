@@ -1,16 +1,31 @@
-## Running the server
-
+## Installing dependencies
 ```bash
-python -m uvicorn main:app --reload
+pip install poetry uvicorn
+poetry install
 ```
 
-Open [http://localhost:8000/docs](http://localhost:8000/docs) with your browser to see the docs.
+## Running the server locally
 
-
-## Deploying
 ```bash
-poetry export -f requirements.txt -o requirements.txt
-gcloud app deploy
+poetry run python -m uvicorn main:app --reload --port 8080
+```
+
+Open [http://localhost:8080/docs](http://localhost:8080/docs) with your browser to see the docs.
+
+
+## Building the container
+```bash
+docker build -t [tag] .
+```
+
+## Running the container
+```bash
+sudo docker run -p 8080:8080 [tag]
+```
+
+## Pushing the container
+```bash
+docker push [registry]
 ```
 
 ## Generate migrations

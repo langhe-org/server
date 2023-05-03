@@ -20,7 +20,7 @@ docker build -t [tag] .
 
 ## Running the container
 ```bash
-sudo docker run -p 8080:8080 [tag]
+docker run -p 8080:8080 [tag]
 ```
 
 ## Pushing the container

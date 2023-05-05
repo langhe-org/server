@@ -1,6 +1,6 @@
 from fastapi import Depends
-from endpoints.session_manager import SessionManager
-from endpoints.utils import ensure_valid_admin_jwt, ensure_valid_greenhouse_owner_jwt
+from ..session_manager import SessionManager
+from .utils import ensure_valid_admin_jwt, ensure_valid_greenhouse_owner_jwt
 from .shared import app, security
 from sqlalchemy.orm import Session
 from database import engine
@@ -8,14 +8,15 @@ from models.greenhouse import DbGreenhouse, Greenhouse, CreateGreenhouse, Update
 from fastapi.security import HTTPAuthorizationCredentials
 
 
-@app.get("/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
-def get(greenhouse_id: int):
+@app.get("/client/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
+def get(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    ensure_valid_greenhouse_owner_jwt(credentials, greenhouse_id)
     with SessionManager() as db:
         db_greenhouse = db.query(DbGreenhouse).filter(DbGreenhouse.id == greenhouse_id).first()
         return db_greenhouse.to_greenhouse()
 
 
-@app.post("/v1/greenhouse", response_model=Greenhouse)
+@app.post("/client/v1/greenhouse", response_model=Greenhouse)
 def create(greenhouse: CreateGreenhouse, credentials: HTTPAuthorizationCredentials = Depends(security)):
     ensure_valid_admin_jwt(credentials)
     with SessionManager() as db:
@@ -26,7 +27,7 @@ def create(greenhouse: CreateGreenhouse, credentials: HTTPAuthorizationCredentia
         return db_greenhouse
 
 
-@app.patch("/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
+@app.patch("/client/v1/greenhouse/{greenhouse_id}", response_model=Greenhouse)
 def update(greenhouse_id: int, greenhouse: UpdateGreenhouse, credentials: HTTPAuthorizationCredentials = Depends(security)):
     ensure_valid_greenhouse_owner_jwt(credentials, greenhouse_id)
     with SessionManager() as db:

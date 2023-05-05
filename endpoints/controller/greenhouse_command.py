@@ -1,26 +1,14 @@
-from endpoints.session_manager import SessionManager
-from endpoints.greenhouse_state import create as create_greenhouse_state
-from endpoints.utils import ensure_valid_greenhouse_owner_jwt
-from models.command import Command, ControllerCommand, CreateCommand, DbCommand
-from models.greenhouses_state import DbGreenhouseState, GreenhouseState, CreateGreenhouseState
-from .shared import app, security
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-from database import engine
-from fastapi import Depends, status
-from fastapi.security import HTTPAuthorizationCredentials
+from ..session_manager import SessionManager
+from .greenhouse_state import create as create_greenhouse_state
+from .utils import ensure_valid_greenhouse
+from models.command import ControllerCommand, DbCommand
+from models.greenhouses_state import CreateGreenhouseState
+from ..shared import app
+from .shared import security
+from fastapi import Depends
+from fastapi.security import HTTPBasicCredentials
 
-
-@app.post("/v1/greenhouse-command/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
-def create(greenhouse_id: int, command: CreateCommand, credentials: HTTPAuthorizationCredentials = Depends(security)):
-    ensure_valid_greenhouse_owner_jwt(credentials, greenhouse_id)
-    with SessionManager() as db:
-        db_command = command.to_db_command(greenhouse_id)
-        db.add(db_command)
-        db.commit()
-
-
-@app.post("/v1/greenhouse-command/{greenhouse_id}/controller-request", response_model=ControllerCommand)
+# @app.post("/v1/greenhouse-command/{greenhouse_id}/controller-request", response_model=ControllerCommand)
 def controller_request(greenhouse_id):
     with SessionManager() as db:
         query_filters = db.query(DbCommand)\
@@ -54,7 +42,8 @@ def controller_request(greenhouse_id):
         return output
 
 # RESTless API for controller (requested by Kyle)
-@app.post("/v1/controller-ping/{greenhouse_id}", response_model=ControllerCommand)
-def controller_ping(greenhouse_id: int, greenhouse_state: CreateGreenhouseState):
+@app.post("/controller/v1/controller-ping/{greenhouse_id}", response_model=ControllerCommand)
+def controller_ping(greenhouse_id: int, greenhouse_state: CreateGreenhouseState, credentials: HTTPBasicCredentials = Depends(security)):
+    ensure_valid_greenhouse(credentials, greenhouse_id)
     create_greenhouse_state(greenhouse_id, greenhouse_state)
     return controller_request(greenhouse_id)

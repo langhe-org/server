@@ -1,4 +1,4 @@
-from endpoints.session_manager import SessionManager
+from ..session_manager import SessionManager
 from models.users_greenhouse import DbUserGreenhouse
 from .shared import app, security
 from .utils import ensure_valid_jwt
@@ -11,7 +11,7 @@ import os
 
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 
-@app.post("/v1/auth/google", response_model=User)
+@app.post("/client/v1/auth/google", response_model=User)
 def get_body(credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:

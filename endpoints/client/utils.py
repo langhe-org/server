@@ -1,4 +1,4 @@
-from endpoints.session_manager import SessionManager
+from ..session_manager import SessionManager
 from models.users_greenhouse import DbUserGreenhouse
 from .shared import app, security
 from models.user import DbPermission, DbUser, PermissionType

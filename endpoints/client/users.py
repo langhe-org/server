@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from endpoints.session_manager import SessionManager
+from ..session_manager import SessionManager
 from .shared import app, security
 from .utils import ensure_valid_jwt, ensure_valid_greenhouse_owner_jwt
 from sqlalchemy import select
@@ -9,7 +9,7 @@ from models.user import DbUser, User, UpdateUser
 from models.users_greenhouse import DbUserGreenhouse
 from fastapi.security import HTTPAuthorizationCredentials
 
-@app.get("/v1/account", response_model=User)
+@app.get("/client/v1/account", response_model=User)
 def get(credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
@@ -26,7 +26,7 @@ def get(credentials: HTTPAuthorizationCredentials = Depends(security)):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@app.patch("/v1/account", response_model=User)
+@app.patch("/client/v1/account", response_model=User)
 def update(user: UpdateUser, credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
@@ -41,7 +41,7 @@ def update(user: UpdateUser, credentials: HTTPAuthorizationCredentials = Depends
         return user
 
 
-@app.post("/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
+@app.post("/client/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
 def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_jwt(credentials)
     with SessionManager() as db:
@@ -57,7 +57,7 @@ def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredential
         db.add(DbUserGreenhouse(user_id=db_user.id, greenhouse_id=greenhouse_id))
         db.commit()
 
-@app.delete("/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
+@app.delete("/client/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
 def unlink_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
     jwt = ensure_valid_greenhouse_owner_jwt(credentials)
     with SessionManager() as db:

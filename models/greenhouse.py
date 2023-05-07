@@ -29,6 +29,7 @@ class DbGreenhouse(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=True)
+    token_hash = Column(String, nullable=False)
     type = Column(Enum(GreenhouseType), nullable=False)
     location_name = Column(String, nullable=False)
     longitude = Column(Float, nullable=False)
@@ -55,6 +56,10 @@ class CreateGreenhouse(BaseModel):
 
     def to_db_greenhouse(self) -> DbGreenhouse:
         return DbGreenhouse(name=self.name, type=self.type, location_name=self.location_name, longitude=self.longitude, latitude=self.latitude, timezone=self.timezone)
+
+class CreateGreenhouseResponse(BaseModel):
+    greenhouse: Greenhouse
+    token: str
 
 
 class UpdateGreenhouse(BaseModel):

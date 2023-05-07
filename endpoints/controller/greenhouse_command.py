@@ -1,3 +1,4 @@
+from models.greenhouse import DbGreenhouse
 from ..session_manager import SessionManager
 from .greenhouse_state import create as create_greenhouse_state
 from .utils import ensure_valid_greenhouse
@@ -42,8 +43,8 @@ def controller_request(greenhouse_id):
         return output
 
 # RESTless API for controller (requested by Kyle)
-@app.post("/controller/v1/controller-ping/{greenhouse_id}", response_model=ControllerCommand)
-def controller_ping(greenhouse_id: int, greenhouse_state: CreateGreenhouseState, credentials: HTTPBasicCredentials = Depends(security)):
-    ensure_valid_greenhouse(credentials, greenhouse_id)
-    create_greenhouse_state(greenhouse_id, greenhouse_state)
-    return controller_request(greenhouse_id)
+@app.post("/controller/v1/controller-ping", response_model=ControllerCommand)
+def controller_ping(greenhouse_state: CreateGreenhouseState, credentials: HTTPBasicCredentials = Depends(security)):
+    greenhouse: DbGreenhouse = ensure_valid_greenhouse(credentials)
+    create_greenhouse_state(greenhouse.id, greenhouse_state)
+    return controller_request(greenhouse.id)

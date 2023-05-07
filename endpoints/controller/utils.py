@@ -2,16 +2,16 @@ from ..session_manager import SessionManager
 from models.greenhouse import DbGreenhouse
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
-# from passlib.hash import bcrypt_sha256
+from passlib.hash import bcrypt_sha256
 
 
-def ensure_valid_greenhouse(credentials: HTTPBasicCredentials, greenhouse_id: int) -> DbGreenhouse:
-    ensure_valid_greenhouse(credentials, greenhouse_id)
+def ensure_valid_greenhouse(credentials: HTTPBasicCredentials) -> DbGreenhouse:
+    try:
+        greenhouse_id = int(credentials.username)
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     with SessionManager() as db:
-        greenhouse = db.query(DbGreenhouse).filter(DbGreenhouse.id == greenhouse_id).first()
-        if greenhouse:
+        greenhouse: DbGreenhouse = db.query(DbGreenhouse).filter(DbGreenhouse.id == greenhouse_id).first()
+        if greenhouse and bcrypt_sha256.verify(credentials.password, greenhouse.token_hash):
             return greenhouse
-            # bcrypt_sha256.verify("joshua", hash)
-            # (greenhouse.password)
-
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

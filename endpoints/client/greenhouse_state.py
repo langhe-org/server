@@ -5,7 +5,7 @@ from .shared import app, security
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import engine
-from fastapi import Depends, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 @app.get("/client/v1/greenhouse-state/{greenhouse_id}", response_model=GreenhouseState)
@@ -17,7 +17,10 @@ def get(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(
             .filter(DbGreenhouseState.greenhouse_id == greenhouse_id)\
             .order_by(DbGreenhouseState.time.desc())\
             .first()
-        return state.to_greenhouse_state()
+        if state:
+            return state.to_greenhouse_state()
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @app.post("/client/v1/greenhouse-state/{greenhouse_id}", status_code=status.HTTP_201_CREATED)

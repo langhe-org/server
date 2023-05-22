@@ -59,7 +59,7 @@ def link_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredential
 
 @app.delete("/client/v1/account/link-greenhouse/{greenhouse_id}", status_code=status.HTTP_201_CREATED)
 def unlink_greenhouse(greenhouse_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
-    jwt = ensure_valid_greenhouse_owner_jwt(credentials)
+    jwt = ensure_valid_greenhouse_owner_jwt(credentials, greenhouse_id)
     with SessionManager() as db:
         db_user = db.query(DbUser).filter(DbUser.email == jwt["email"]).first()
 

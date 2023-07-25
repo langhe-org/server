@@ -46,5 +46,5 @@ def controller_request(greenhouse_id):
 @app.post("/controller/v1/controller-ping", response_model=ControllerCommand)
 def controller_ping(greenhouse_state: CreateGreenhouseState, credentials: HTTPBasicCredentials = Depends(security)):
     greenhouse: DbGreenhouse = ensure_valid_greenhouse(credentials)
-    create_greenhouse_state(greenhouse.id, greenhouse_state)
+    create_greenhouse_state(greenhouse_state, credentials=credentials)
     return controller_request(greenhouse.id)
